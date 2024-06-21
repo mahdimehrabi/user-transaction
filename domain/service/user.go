@@ -4,6 +4,7 @@ import (
 	models "bbdk/domain/entity"
 	userRepo "bbdk/domain/repository/user"
 	logger "bbdk/infrastructure/log"
+	"bbdk/utils/encrypt"
 	"errors"
 )
 
@@ -29,6 +30,8 @@ func NewUserService(userRepo userRepo.Repository, logger logger.Logger) *userSer
 }
 
 func (s *userService) CreateUser(user *models.User) error {
+	user.Password = encrypt.HashSHA256(user.Password)
+
 	if err := s.userRepo.CreateUser(user); err != nil {
 		s.logger.Errorf("failed to create user:%s", err.Error())
 		return err
@@ -49,6 +52,7 @@ func (s *userService) GetUserByID(id uint) (*models.User, error) {
 }
 
 func (s *userService) UpdateUser(user *models.User) error {
+	user.Password = encrypt.HashSHA256(user.Password)
 	if err := s.userRepo.UpdateUser(user); err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
 			return err
