@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"testing"
+	"time"
 )
 
 func TestUserService_Create(t *testing.T) {
@@ -72,4 +73,20 @@ func TestUserService_Create(t *testing.T) {
 			userRepoMock.EXPECT()
 		})
 	}
+}
+
+func BenchmarkService_Create(b *testing.B) {
+	ctrl := gomock.NewController(b)
+	userRepoMock := mock_user.NewMockRepository(ctrl)
+	userRepoMock.EXPECT().CreateUser(gomock.Any()).Return(nil)
+	loggerMock := mock_logger.NewMockLogger(ctrl)
+	b.ResetTimer()
+	service := NewUserService(userRepoMock, loggerMock)
+	user := &entity.User{Name: "fsddfs", Email: "ma@gmail.com", Password: "A12345678"}
+	service.CreateUser(user)
+	if b.Elapsed() > 100*time.Microsecond {
+		b.Error("address_user service-createBatchAddresses takes too long to run")
+	}
+	loggerMock.EXPECT()
+	userRepoMock.EXPECT()
 }
