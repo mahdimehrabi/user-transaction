@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"bbdk/domain/entity"
 	"errors"
 	"gorm.io/gorm"
 )

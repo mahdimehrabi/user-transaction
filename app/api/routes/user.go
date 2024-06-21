@@ -6,16 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RouteHandler struct {
-	userController *controller.UserController
+type UserRouter struct {
+	userController controller.UserController
 }
 
-func NewRouteHandler(userService service.UserService) *RouteHandler {
+func NewUserRouter(userService service.UserService) *UserRouter {
 	userController := controller.NewUserController(userService)
-	return &RouteHandler{userController: userController}
+	return &UserRouter{userController: *userController} //transient controller injection to improve performance
 }
 
-func (rh *RouteHandler) SetupRoutes(router *gin.Engine) {
+func (rh *UserRouter) SetupRoutes(router *gin.Engine) {
 	router.POST("/users", rh.userController.CreateUser)
 	router.GET("/users/:id", rh.userController.GetUserByID)
 	router.PUT("/users/:id", rh.userController.UpdateUser)

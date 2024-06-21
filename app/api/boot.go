@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bbdk/app/api/routes"
 	"bbdk/infrastructure/godotenv"
 	"bbdk/infrastructure/log/zerolog"
 	"github.com/gin-gonic/gin"
@@ -11,14 +12,8 @@ func Boot() {
 	logger := zerolog.NewLogger()
 	env := godotenv.NewEnv()
 	env.Load()
-
-	//I must define router struct but for lack of time I call handler(controller) directly
-	router(r, addressUser)
-
-	r.Run()
-}
-
-func router(r *gin.Engine, addressUser interface{}) {
-	r.POST("/api/users", addressUser.CreateUser)
-	r.GET("/api/users/:id", addressUser.DetailUser)
+	routes.HandleRouters(r, routes.CreateRouters(env, logger))
+	if err := r.Run(); err != nil {
+		logger.Fatalf("error running gin server error:%s", err.Error())
+	}
 }
