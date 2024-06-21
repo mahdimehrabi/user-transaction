@@ -60,6 +60,7 @@ func (s *userService) DeleteUser(id uint) error {
 			return err
 		}
 		s.logger.Errorf("failed to delete user:%s", err.Error())
+		return err
 	}
 	return nil
 }
