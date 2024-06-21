@@ -28,6 +28,10 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	user := req.ToEntity()
 	if err := uc.service.CreateUser(user); err != nil {
+		if errors.Is(err, userRepo.ErrAlreadyExist) {
+			response.Response(c, nil, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.InternalServerError(c)
 		return
 	}

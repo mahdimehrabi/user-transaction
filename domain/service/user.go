@@ -33,6 +33,9 @@ func (s *userService) CreateUser(user *models.User) error {
 	user.Password = encrypt.HashSHA256(user.Password)
 
 	if err := s.userRepo.CreateUser(user); err != nil {
+		if errors.Is(err, userRepo.ErrAlreadyExist) {
+			return userRepo.ErrAlreadyExist
+		}
 		s.logger.Errorf("failed to create user:%s", err.Error())
 		return err
 	}

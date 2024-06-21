@@ -2,7 +2,9 @@ package gorm
 
 import (
 	"bbdk/domain/entity"
+	userRepo "bbdk/domain/repository/user"
 	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +19,11 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (r *UserRepository) CreateUser(user *entity.User) error {
 	if err := r.db.Create(user).Error; err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" {
+				return userRepo.ErrAlreadyExist
+			}
+		}
 		return err
 	}
 	return nil
