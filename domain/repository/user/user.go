@@ -10,10 +10,10 @@ var (
 	ErrNotFound     = errors.New("not found")
 )
 
-// Repository defines the methods that any repository implementation must have
 type Repository interface {
-	CreateUser(user *models.User) error
-	GetUserByID(id uint) (*models.User, error)
-	UpdateUser(user *models.User) error
+	CreateUser(user *entity.User) error
+	GetUserByID(id uint) (*entity.User, error)
+	UpdateUser(user *entity.User) error
 	DeleteUser(id uint) error
+	GetAll(offset, limit int) ([]*entity.User, error)
 }

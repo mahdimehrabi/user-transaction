@@ -7,6 +7,7 @@ import (
 	mock_user "bbdk/mock/repository"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"testing"
 )
@@ -303,6 +304,95 @@ func TestUserService_DeleteUser(t *testing.T) {
 	}
 }
 
+func TestUserService_GetAllUsers(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	t.Cleanup(func() {
+		ctrl.Finish()
+	})
+	err := errors.New("error")
+
+	users := []*entity.User{{Name: "John Doe", Email: "john@example.com"}}
+	var tests = []struct {
+		name         string
+		loggerMock   func() *mock_logger.MockLogger
+		userRepoMock func() *mock_user.MockRepository
+		id           uint
+		result       []*entity.User
+		error        error
+		page         int
+		pageSize     int
+	}{
+		{
+			name: "success",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().GetAll(gomock.Any(), gomock.Any()).Return(users, nil)
+				return userRepoMock
+			},
+			id:       1,
+			result:   users,
+			error:    nil,
+			pageSize: 10,
+			page:     2,
+		},
+		{
+			name: "invalid page",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				return userRepoMock
+			},
+			id:       2,
+			result:   nil,
+			error:    ErrInvalidPage,
+			page:     -2,
+			pageSize: 0,
+		},
+		{
+			name: "repo error",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				loggerInfra.EXPECT().Errorf(gomock.Any(), gomock.Any())
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().GetAll(gomock.Any(), gomock.Any()).Return(nil, err)
+				return userRepoMock
+			},
+			id:       3,
+			result:   nil,
+			error:    err,
+			pageSize: 10,
+			page:     2,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			userRepoMock := test.userRepoMock()
+			loggerMock := test.loggerMock()
+			service := NewUserService(userRepoMock, loggerMock)
+			result, err := service.GetAllUsers(test.page, test.pageSize)
+
+			if !errors.Is(err, test.error) {
+				t.Errorf("error:%s is not equal to %s", err, test.error)
+			}
+
+			if !gomock.Eq(result).Matches(test.result) {
+				t.Errorf("result:%v is not equal to %v", result, test.result)
+			}
+		})
+	}
+}
+
 func BenchmarkUserService_CreateUser(b *testing.B) {
 	ctrl := gomock.NewController(b)
 	userRepoMock := mock_user.NewMockRepository(ctrl)
@@ -356,5 +446,37 @@ func BenchmarkUserService_GetUserByID(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = service.GetUserByID(id)
+	}
+}
+
+func BenchmarkUserService_GetAllUsers(b *testing.B) {
+	ctrl := gomock.NewController(b)
+	userRepoMock := mock_user.NewMockRepository(ctrl)
+	loggerMock := mock_logger.NewMockLogger(ctrl)
+	service := NewUserService(userRepoMock, loggerMock)
+
+	// Prepare mock data
+	users := make([]*entity.User, 1000)
+	for i := 0; i < 1000; i++ {
+		users[i] = &entity.User{Name: fmt.Sprintf("User%d", i+1)}
+	}
+
+	// Define benchmark parameters
+	page := 1
+	pageSize := 10
+	offset := (page - 1) * pageSize
+	limit := pageSize
+
+	// Mock repository call
+	userRepoMock.EXPECT().GetAll(offset, limit).Return(users, nil).AnyTimes()
+
+	b.ResetTimer()
+
+	// Run benchmark
+	for i := 0; i < b.N; i++ {
+		_, err := service.GetAllUsers(page, pageSize)
+		if err != nil {
+			b.Fatalf("Failed to fetch users: %v", err)
+		}
 	}
 }

@@ -7,11 +7,16 @@ import (
 	"errors"
 )
 
+var (
+	ErrInvalidPage = errors.New("invalid page or page size")
+)
+
 type UserService interface {
 	CreateUser(user *models.User) error
 	GetUserByID(id uint) (*models.User, error)
 	UpdateUser(user *models.User) error
 	DeleteUser(id uint) error
+	GetAllUsers(page, pageSize int) ([]*models.User, error)
 }
 type userService struct {
 	userRepo userRepo.Repository
@@ -19,7 +24,7 @@ type userService struct {
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(userRepo userRepo.Repository, logger logger.Logger) UserService {
+func NewUserService(userRepo userRepo.Repository, logger logger.Logger) *userService {
 	return &userService{userRepo: userRepo, logger: logger}
 }
 
@@ -63,4 +68,19 @@ func (s *userService) DeleteUser(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (s *userService) GetAllUsers(page, pageSize int) ([]*models.User, error) {
+	if page <= 0 || pageSize <= 0 {
+		return nil, ErrInvalidPage
+	}
+	offset := (page - 1) * pageSize
+	limit := pageSize
+
+	users, err := s.userRepo.GetAll(offset, limit)
+	if err != nil {
+		s.logger.Errorf("failed to get all users: %s", err.Error())
+		return nil, err
+	}
+	return users, nil
 }

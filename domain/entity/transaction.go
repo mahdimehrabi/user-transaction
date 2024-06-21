@@ -1,4 +1,4 @@
-package models
+package entity
 
 type Transaction struct {
 	ID     uint    `gorm:"primaryKey"`
