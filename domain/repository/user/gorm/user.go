@@ -33,15 +33,18 @@ func (r *UserRepository) GetUserByID(id uint) (*entity.User, error) {
 	var user entity.User
 	if err := r.db.First(&user, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return nil, userRepo.ErrNotFound
 		}
 		return nil, err
+
 	}
 	return &user, nil
 }
 
 func (r *UserRepository) UpdateUser(user *entity.User) error {
-	if err := r.db.Save(user).Error; err != nil {
+	tx := r.db.Where("id", user.ID).UpdateColumns(user)
+
+	if err := tx.Error; err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			if pgErr.Code == "23505" {
 				return userRepo.ErrAlreadyExist
@@ -49,12 +52,21 @@ func (r *UserRepository) UpdateUser(user *entity.User) error {
 		}
 		return err
 	}
+	if tx.RowsAffected < 1 {
+		return userRepo.ErrNotFound
+
+	}
 	return nil
 }
 
 func (r *UserRepository) DeleteUser(id uint) error {
-	if err := r.db.Delete(&entity.User{}, id).Error; err != nil {
+	tx := r.db.Delete(&entity.User{}, id)
+	if err := tx.Error; err != nil {
 		return err
+	}
+	if tx.RowsAffected < 1 {
+		return userRepo.ErrNotFound
+
 	}
 	return nil
 }
