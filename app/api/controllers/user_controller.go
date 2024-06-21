@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bbdk/app/api/dto"
+	"bbdk/app/api/response"
 	userRepo "bbdk/domain/repository/user"
 	"bbdk/domain/service"
 	"errors"
@@ -21,17 +22,17 @@ func NewUserController(service service.UserService) *UserController {
 func (uc *UserController) CreateUser(c *gin.Context) {
 	var req dto.UserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Response(c, nil, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user := req.ToEntity()
 	if err := uc.service.CreateUser(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.InternalServerError(c)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{})
+	response.Response(c, nil, http.StatusCreated, "")
 }
 
 func (uc *UserController) GetUserByID(c *gin.Context) {
@@ -44,27 +45,27 @@ func (uc *UserController) GetUserByID(c *gin.Context) {
 	user, err := uc.service.GetUserByID(uint(id))
 	if err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			response.NotFound(c)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
+			response.InternalServerError(c)
 		}
 		return
 	}
 	userResponse := &dto.UserResponse{}
 	userResponse.FromEntity(user)
-	c.JSON(http.StatusOK, userResponse)
+	response.Response(c, userResponse, http.StatusOK, "")
 }
 
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		response.Response(c, nil, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var req dto.UserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Response(c, nil, http.StatusBadRequest, err.Error())
 		return
 	}
 	user := req.ToEntity()
@@ -72,33 +73,33 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 
 	if err := uc.service.UpdateUser(user); err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			response.NotFound(c)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+			response.InternalServerError(c)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+	response.Response(c, nil, http.StatusOK, "")
 }
 
 func (uc *UserController) DeleteUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		response.Response(c, nil, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := uc.service.DeleteUser(uint(id)); err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			response.NotFound(c)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+			response.InternalServerError(c)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	response.Response(c, nil, http.StatusOK, "")
 }
 
 func (uc *UserController) GetAllUsers(c *gin.Context) {
@@ -114,7 +115,7 @@ func (uc *UserController) GetAllUsers(c *gin.Context) {
 
 	users, err := uc.service.GetAllUsers(page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+		response.InternalServerError(c)
 		return
 	}
 
@@ -126,5 +127,5 @@ func (uc *UserController) GetAllUsers(c *gin.Context) {
 		responses[i] = userResponse
 	}
 
-	c.JSON(http.StatusOK, responses)
+	response.Response(c, responses, http.StatusOK, "")
 }
