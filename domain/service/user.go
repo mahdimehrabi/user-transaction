@@ -19,8 +19,8 @@ type userService struct {
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(userRepo userRepo.Repository) UserService {
-	return &userService{userRepo: userRepo}
+func NewUserService(userRepo userRepo.Repository, logger logger.Logger) UserService {
+	return &userService{userRepo: userRepo, logger: logger}
 }
 
 func (s *userService) CreateUser(user *models.User) error {

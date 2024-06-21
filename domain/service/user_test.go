@@ -8,10 +8,9 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"testing"
-	"time"
 )
 
-func TestService_Create(t *testing.T) {
+func TestUserService_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	t.Cleanup(func() {
 		ctrl.Finish()
@@ -20,84 +19,56 @@ func TestService_Create(t *testing.T) {
 
 	var tests = []struct {
 		name         string
-		addresses    []*entity.User
 		loggerMock   func() *mock_logger.MockLogger
 		userRepoMock func() *mock_user.MockRepository
 		user         *entity.User
 		ctx          context.Context
+		error        error
 	}{
 		{
 			name: "success",
-			loggerMock: func() *mock_log.MockLog {
-				loggerInfra := mock_log.NewMockLog(ctrl)
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
 				return loggerInfra
 			},
-			addressRepoMock: func() *repository.MockAddress {
-				addrRepoMock := repository.NewMockAddress(ctrl)
-				addrRepoMock.EXPECT().BatchCreate(gomock.Any(), gomock.Any()).Return(nil)
-				return addrRepoMock
-			},
-			userRepoMock: func() *repository.MockUser {
-				userRepoMock := repository.NewMockUser(ctrl)
-				userRepoMock.EXPECT().Create(gomock.Any(), gomock.Any()).Return(int64(1), nil)
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().CreateUser(gomock.Any()).Return(nil)
 				return userRepoMock
 			},
-			addresses: []*entity.Address{entity.NewAddress("c", "s", "co", "str", "3tgdsgds")},
-			user:      &entity.User{Name: "Dgsgds", Lastname: "sfafsasf"},
-			ctx:       context.Background(),
-		},
-		{
-			name: "AddrRepoError",
-			loggerMock: func() *mock_log.MockLog {
-				loggerInfra := mock_log.NewMockLog(ctrl)
-				loggerInfra.EXPECT().Error(err).MinTimes(2).Return()
-				return loggerInfra
-			},
-			addressRepoMock: func() *repository.MockAddress {
-				addrRepoMock := repository.NewMockAddress(ctrl)
-				addrRepoMock.EXPECT().BatchCreate(gomock.Any(), gomock.Any()).MinTimes(2).Return(err)
-				return addrRepoMock
-			},
-			userRepoMock: func() *repository.MockUser {
-				userRepoMock := repository.NewMockUser(ctrl)
-				userRepoMock.EXPECT().Create(gomock.Any(), gomock.Any()).Return(int64(1), nil)
-				return userRepoMock
-			},
-			addresses: []*entity.Address{entity.NewAddress("c", "s", "co", "str", "3tgdsgds")},
-			ctx:       context.Background(),
+			user:  &entity.User{Name: "fsddfs", Email: "ma@gmail.com", Password: "A12345678"},
+			ctx:   context.Background(),
+			error: nil,
 		},
 		{
 			name: "UserRepoError",
-			loggerMock: func() *mock_log.MockLog {
-				loggerInfra := mock_log.NewMockLog(ctrl)
-				loggerInfra.EXPECT().Error(err).MinTimes(2).Return()
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				loggerInfra.EXPECT().Errorf(gomock.Any(), gomock.Any())
 				return loggerInfra
 			},
-			addressRepoMock: func() *repository.MockAddress {
-				addrRepoMock := repository.NewMockAddress(ctrl)
-				return addrRepoMock
-			},
-			userRepoMock: func() *repository.MockUser {
-				userRepoMock := repository.NewMockUser(ctrl)
-				userRepoMock.EXPECT().Create(gomock.Any(), gomock.Any()).MinTimes(2).Return(int64(0), err)
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().CreateUser(gomock.Any()).Return(err)
 				return userRepoMock
 			},
-			addresses: []*entity.Address{entity.NewAddress("c", "s", "co", "str", "3tgdsgds")},
-			ctx:       context.Background(),
+			user:  &entity.User{Name: "fsddfs", Email: "ma@gmail.com", Password: "A12345678"},
+			ctx:   context.Background(),
+			error: err,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			addressRepoMock := test.addressRepoMock()
 			userRepoMock := test.userRepoMock()
 			loggerMock := test.loggerMock()
-			service := NewService(loggerMock, addressRepoMock, userRepoMock)
-			service.Create(test.addresses, test.user)
+			service := NewUserService(userRepoMock, loggerMock)
+			err := service.CreateUser(test.user)
 
-			time.Sleep(600 * time.Millisecond)
+			if !errors.Is(err, test.error) {
+				t.Errorf("error:%s is not equal to %s", err, test.error)
+			}
 			loggerMock.EXPECT()
-			addressRepoMock.EXPECT()
 			userRepoMock.EXPECT()
 		})
 	}
