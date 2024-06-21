@@ -173,3 +173,76 @@ func TestUserService_GetUserByID(t *testing.T) {
 		})
 	}
 }
+
+func TestUserService_UpdateUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	t.Cleanup(func() {
+		ctrl.Finish()
+	})
+	err := errors.New("error")
+
+	var tests = []struct {
+		name         string
+		loggerMock   func() *mock_logger.MockLogger
+		userRepoMock func() *mock_user.MockRepository
+		user         *entity.User
+		error        error
+	}{
+		{
+			name: "success",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().UpdateUser(gomock.Any()).Return(nil)
+				return userRepoMock
+			},
+			user:  &entity.User{ID: 1, Name: "John Doe", Email: "john@example.com", Password: "password123"},
+			error: nil,
+		},
+		{
+			name: "not found",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().UpdateUser(gomock.Any()).Return(userRepo.ErrNotFound)
+				return userRepoMock
+			},
+			user:  &entity.User{ID: 2, Name: "John Doe", Email: "john@example.com", Password: "password123"},
+			error: userRepo.ErrNotFound,
+		},
+		{
+			name: "repo error",
+			loggerMock: func() *mock_logger.MockLogger {
+				loggerInfra := mock_logger.NewMockLogger(ctrl)
+				loggerInfra.EXPECT().Errorf(gomock.Any(), gomock.Any())
+				return loggerInfra
+			},
+			userRepoMock: func() *mock_user.MockRepository {
+				userRepoMock := mock_user.NewMockRepository(ctrl)
+				userRepoMock.EXPECT().UpdateUser(gomock.Any()).Return(err)
+				return userRepoMock
+			},
+			user:  &entity.User{ID: 3, Name: "John Doe", Email: "john@example.com", Password: "password123"},
+			error: err,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			userRepoMock := test.userRepoMock()
+			loggerMock := test.loggerMock()
+			service := NewUserService(userRepoMock, loggerMock)
+			err := service.UpdateUser(test.user)
+
+			if !errors.Is(err, test.error) {
+				t.Errorf("error:%s is not equal to %s", err, test.error)
+			}
+		})
+	}
+}
