@@ -39,7 +39,7 @@ curl -X PUT http://localhost:8080/users/1 \
         "name": "John Doe Updated",
         "email": "john.updated@example.com",
         "password": "newpassword123"
-    }
+    }'
 ```
 
 

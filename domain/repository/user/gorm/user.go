@@ -42,6 +42,11 @@ func (r *UserRepository) GetUserByID(id uint) (*entity.User, error) {
 
 func (r *UserRepository) UpdateUser(user *entity.User) error {
 	if err := r.db.Save(user).Error; err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" {
+				return userRepo.ErrAlreadyExist
+			}
+		}
 		return err
 	}
 	return nil

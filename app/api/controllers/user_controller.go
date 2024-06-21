@@ -78,6 +78,9 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 	if err := uc.service.UpdateUser(user); err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
 			response.NotFound(c)
+		} else if errors.Is(err, userRepo.ErrAlreadyExist) {
+			response.Response(c, nil, http.StatusBadRequest, err.Error())
+			return
 		} else {
 			response.InternalServerError(c)
 		}

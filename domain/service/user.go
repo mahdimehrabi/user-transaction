@@ -59,6 +59,8 @@ func (s *userService) UpdateUser(user *models.User) error {
 	if err := s.userRepo.UpdateUser(user); err != nil {
 		if errors.Is(err, userRepo.ErrNotFound) {
 			return err
+		} else if errors.Is(err, userRepo.ErrAlreadyExist) {
+			return userRepo.ErrAlreadyExist
 		}
 		s.logger.Errorf("failed to update user:%s", err.Error())
 		return err
