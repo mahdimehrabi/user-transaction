@@ -107,3 +107,4 @@ curl -X GET "http://localhost:8080/api/users?page=1&pageSize=10" \
 - environment variables file
 - password encryption
 - general response generator for cleaner responses
+- playground custom validation for foregin key id validation

@@ -3,6 +3,7 @@ package routes
 import (
 	"bbdk/app/api/jwt"
 	"bbdk/app/api/middleware"
+	gormTransRepo "bbdk/domain/repository/transaction/gorm"
 	gormUserRepo "bbdk/domain/repository/user/gorm"
 	"bbdk/domain/service"
 	"bbdk/infrastructure/godotenv"
@@ -22,11 +23,14 @@ func CreateRouters(env *godotenv.Env, logger logger.Logger) []Router {
 		logger.Fatalf("failed to connect to database error:%s", err.Error())
 	}
 	userRepo := gormUserRepo.NewUserRepository(db)
+	transRepo := gormTransRepo.NewTransactionRepository(db)
 	userService := service.NewUserService(userRepo, logger)
+	transactionService := service.NewTransactionService(transRepo, logger)
 	authService := jwt.NewAuthService(env, logger, userRepo)
 	authMiddleware := middleware.NewAuthMiddleware(logger, env)
 
-	return []Router{NewAuthRouter(env, authService), NewUserRouter(userService, *authMiddleware)}
+	return []Router{NewAuthRouter(env, authService),
+		NewUserRouter(userService, *authMiddleware), NewTransactionRouter(transactionService, *authMiddleware)}
 }
 
 func HandleRouters(e *gin.Engine, routers []Router) {
