@@ -26,6 +26,14 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 Renew Access Token 
 ```
+valid, atClaims, err := DecodeToken(refreshToken, refreshSecret)
+if err != nil {
+    var vErr *jwt.ValidationError
+    if errors.As(err, &vErr) {
+        err = userRepo.ErrNotFound
+    }
+    return
+}
 
 ```
 
@@ -44,17 +52,20 @@ Create User
 ```
 curl -X POST http://localhost:8080/api/users \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
     -d '{
         "name": "John Doe",
         "email": "john@example.com",
         "password": "password123"
     }'
+
 ```
 
 Get user with ID 
 
 ```
-curl -X GET http://localhost:8080/api/users/1
+curl -X GET http://localhost:8080/api/users/1 \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 
@@ -62,24 +73,30 @@ Update user with id
 ```
 curl -X PUT http://localhost:8080/api/users/1 \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
     -d '{
         "name": "John Doe Updated",
         "email": "john.updated@example.com",
         "password": "newpassword123"
     }'
+
 ```
 
 
 Delete User with id
 ```
-curl -X DELETE http://localhost:8080/api/users/1
+curl -X DELETE http://localhost:8080/api/users/1 \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 
 Get users with pagination 
 ```
-curl -X GET "http://localhost:8080/users?page=1&pageSize=10"
+curl -X GET "http://localhost:8080/api/users?page=1&pageSize=10" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
+
+
 
 
 

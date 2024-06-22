@@ -3,7 +3,6 @@ package routes
 import (
 	controller "bbdk/app/api/controllers"
 	"bbdk/app/api/jwt"
-	"bbdk/app/api/middleware"
 	"bbdk/infrastructure/godotenv"
 	"github.com/gin-gonic/gin"
 )
@@ -13,9 +12,8 @@ type AuthRouter struct {
 }
 
 func NewAuthRouter(env *godotenv.Env,
-	authService *jwt.AuthService,
-	authMiddleware *middleware.AuthMiddleware) *AuthRouter {
-	authController := controller.NewAuthController(env, authService, authMiddleware)
+	authService *jwt.AuthService) *AuthRouter {
+	authController := controller.NewAuthController(env, authService)
 	return &AuthRouter{authController: authController} //transient controller injection to improve performance
 }
 

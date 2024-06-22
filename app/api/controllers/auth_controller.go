@@ -3,7 +3,6 @@ package controller
 import (
 	"bbdk/app/api/dto"
 	"bbdk/app/api/jwt"
-	"bbdk/app/api/middleware"
 	"bbdk/app/api/response"
 	userRepo "bbdk/domain/repository/user"
 	"bbdk/infrastructure/godotenv"
@@ -15,21 +14,18 @@ import (
 )
 
 type AuthController struct {
-	logger         logger.Logger
-	env            *godotenv.Env
-	authService    *jwt.AuthService
-	authMiddleware *middleware.AuthMiddleware
+	logger      logger.Logger
+	env         *godotenv.Env
+	authService *jwt.AuthService
 }
 
 func NewAuthController(
 	env *godotenv.Env,
 	authService *jwt.AuthService,
-	authMiddleware *middleware.AuthMiddleware,
 ) *AuthController {
 	return &AuthController{
-		env:            env,
-		authService:    authService,
-		authMiddleware: authMiddleware,
+		env:         env,
+		authService: authService,
 	}
 }
 

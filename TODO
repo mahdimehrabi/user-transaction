@@ -1,2 +1,4 @@
 use auth middleware
-update readme user endpoints
+transaction
+dockerize - docker compsoe
+ci/cd

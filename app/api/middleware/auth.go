@@ -77,7 +77,8 @@ func (m AuthMiddleware) claimsToUser(claims jwt.MapClaims) (user *entity.User, o
 		}
 	}()
 	user = new(entity.User)
-	user.ID = claims["userID"].(uint)
+	id := claims["userID"].(float64)
+	user.ID = uint(id)
 	user.Email = claims["email"].(string)
 	ok = true
 	return

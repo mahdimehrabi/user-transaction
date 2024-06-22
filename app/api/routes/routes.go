@@ -26,7 +26,7 @@ func CreateRouters(env *godotenv.Env, logger logger.Logger) []Router {
 	authService := jwt.NewAuthService(env, logger, userRepo)
 	authMiddleware := middleware.NewAuthMiddleware(logger, env)
 
-	return []Router{NewUserRouter(userService), NewAuthRouter(env, authService, authMiddleware)}
+	return []Router{NewAuthRouter(env, authService), NewUserRouter(userService, *authMiddleware)}
 }
 
 func HandleRouters(e *gin.Engine, routers []Router) {
