@@ -2,6 +2,7 @@ include .env
 MIGRATE=migrate -path=migration -database "$(DATABASE_HOST)" -verbose
 
 
+
 db-migrate-up:
 		$(MIGRATE) up
 db-migrate-down:
@@ -20,6 +21,3 @@ db-drop:
 db-create-migration:
 		@read -p  "What is the name of migration?" NAME; \
 		${MIGRATE} create -ext sql -seq -dir migration  $$NAME
-test-all:
-	${DOCKER_COMMAND} exec web go test ./tests/tests/...
-

@@ -13,7 +13,7 @@ func Boot() {
 	env := godotenv.NewEnv()
 	env.Load()
 	routes.HandleRouters(r, routes.CreateRouters(env, logger))
-	if err := r.Run(env.ServerAddr); err != nil {
+	if err := r.Run("localhost:" + env.ServerPort); err != nil {
 		logger.Fatalf("error running gin server error:%s", err.Error())
 	}
 }

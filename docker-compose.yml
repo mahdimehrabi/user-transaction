@@ -1,0 +1,31 @@
+services:
+  badbadak:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    env_file: .env
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    depends_on:
+      - database
+    ports:
+      - ${ServerPort}:${ServerPort}
+
+  database:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+    restart: always
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+
+volumes:
+  psql_data:
+    external: true

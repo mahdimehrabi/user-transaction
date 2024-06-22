@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      badbadak:
+        image: docker.pkg.github.com/mahdimehrabi/bdbdk/badbadak:latest
+        env:
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        ports:
+          - ${{ secrets.SERVER_PORT }}:3000
+        options: --env-file .env
+
+      database:
+        image: postgres:14.1-alpine
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        volumes:
+          - psql_data:/var/lib/postgresql/data
+
+    env:
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t badbadak:latest .
+
+      - name: Run tests
+        run: |
+          docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+          docker-compose -f docker-compose.test.yml down
+
+      - name: Deploy to badbadak service
+        run: docker-compose up -d
+
+      - name: Health check
+        run: |
+          curl -fsSL http://localhost:${SERVER_PORT}/healthcheck || exit 1
+
+volumes:
+  psql_data:
+    external: true

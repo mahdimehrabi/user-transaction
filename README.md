@@ -4,10 +4,24 @@ cp env.example .env
 ```
 config environment variables in .env 
 
+Run containers using docker compose 
+```
+docker compose up -d --build
+```
+
+create database 
+```
+➜ docker compose exec -it database psql -U root
+# CREATE DATABASE bdbdk;
+```
+
 run migrations
 ```
 make db-migrate-up
 ```
+
+##### please consider we run migration from host and we seperated the migration process from production container because of security and liteness so before running migration you must change postgresql host environment variable in .env 
+
 
 
 
