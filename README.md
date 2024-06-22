@@ -96,9 +96,52 @@ curl -X GET "http://localhost:8080/api/users?page=1&pageSize=10" \
     -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
+### Transaction
 
+Create transaction 
+```
+curl -X POST http://localhost:8080/api/transactions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+    -d '{
+        "user_id": 1,
+        "amount": 100.50,
+        "type": "game_referral"
+    }'
+```
+Get transaction by id 
+```
+curl -X GET http://localhost:8080/api/transactions/1 \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
+update transaction 
+```
+curl -X PUT http://localhost:8080/api/transactions/1 \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+    -d '{
+        "user_id": 1,
+        "amount": 200.75,
+        "type": "p2e"
+    }'
 
+```
+
+get all transactions
+
+```
+curl -X GET "http://localhost:8080/api/transactions?page=1&pageSize=10" \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+delete transaction 
+
+```
+curl -X DELETE http://localhost:8080/api/transactions/1 \
+    -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+```
 
 ### Extra Features 
 
