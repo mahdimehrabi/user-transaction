@@ -5,7 +5,7 @@
 package mock_user
 
 import (
-	models "bbdk/domain/entity"
+	entity "bbdk/domain/entity"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,7 +35,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockRepository) CreateUser(user *models.User) error {
+func (m *MockRepository) CreateUser(user *entity.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", user)
 	ret0, _ := ret[0].(error)
@@ -62,11 +62,26 @@ func (mr *MockRepositoryMockRecorder) DeleteUser(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockRepository)(nil).DeleteUser), id)
 }
 
+// FindByField mocks base method.
+func (m *MockRepository) FindByField(field string, value interface{}) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByField", field, value)
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByField indicates an expected call of FindByField.
+func (mr *MockRepositoryMockRecorder) FindByField(field, value interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByField", reflect.TypeOf((*MockRepository)(nil).FindByField), field, value)
+}
+
 // GetAll mocks base method.
-func (m *MockRepository) GetAll(offset, limit int) ([]*models.User, error) {
+func (m *MockRepository) GetAll(offset, limit int) ([]*entity.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", offset, limit)
-	ret0, _ := ret[0].([]*models.User)
+	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -78,10 +93,10 @@ func (mr *MockRepositoryMockRecorder) GetAll(offset, limit interface{}) *gomock.
 }
 
 // GetUserByID mocks base method.
-func (m *MockRepository) GetUserByID(id uint) (*models.User, error) {
+func (m *MockRepository) GetUserByID(id uint) (*entity.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByID", id)
-	ret0, _ := ret[0].(*models.User)
+	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -93,7 +108,7 @@ func (mr *MockRepositoryMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 }
 
 // UpdateUser mocks base method.
-func (m *MockRepository) UpdateUser(user *models.User) error {
+func (m *MockRepository) UpdateUser(user *entity.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", user)
 	ret0, _ := ret[0].(error)

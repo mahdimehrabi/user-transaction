@@ -16,4 +16,5 @@ type Repository interface {
 	UpdateUser(user *entity.User) error
 	DeleteUser(id uint) error
 	GetAll(offset, limit int) ([]*entity.User, error)
+	FindByField(field string, value interface{}) (*entity.User, error)
 }

@@ -1,2 +1,2 @@
-unique already exist
-404
+use auth middleware
+update readme user endpoints

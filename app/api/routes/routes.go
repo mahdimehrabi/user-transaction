@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"bbdk/app/api/jwt"
+	"bbdk/app/api/middleware"
 	gormUserRepo "bbdk/domain/repository/user/gorm"
 	"bbdk/domain/service"
 	"bbdk/infrastructure/godotenv"
@@ -21,8 +23,10 @@ func CreateRouters(env *godotenv.Env, logger logger.Logger) []Router {
 	}
 	userRepo := gormUserRepo.NewUserRepository(db)
 	userService := service.NewUserService(userRepo, logger)
+	authService := jwt.NewAuthService(env, logger, userRepo)
+	authMiddleware := middleware.NewAuthMiddleware(logger, env)
 
-	return []Router{NewUserRouter(userService)}
+	return []Router{NewUserRouter(userService), NewAuthRouter(env, authService, authMiddleware)}
 }
 
 func HandleRouters(e *gin.Engine, routers []Router) {

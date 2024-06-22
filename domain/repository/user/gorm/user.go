@@ -78,3 +78,14 @@ func (r *UserRepository) GetAll(offset, limit int) ([]*entity.User, error) {
 	}
 	return users, nil
 }
+
+func (r *UserRepository) FindByField(field string, value interface{}) (*entity.User, error) {
+	var user entity.User
+	if err := r.db.Where(field+" = ?", value).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, userRepo.ErrNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}

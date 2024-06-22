@@ -16,9 +16,12 @@ func NewUserRouter(userService service.UserService) *UserRouter {
 }
 
 func (rh *UserRouter) SetupRoutes(router *gin.Engine) {
-	router.POST("/users", rh.userController.CreateUser)
-	router.GET("/users/:id", rh.userController.GetUserByID)
-	router.PUT("/users/:id", rh.userController.UpdateUser)
-	router.DELETE("/users/:id", rh.userController.DeleteUser)
-	router.GET("/users", rh.userController.GetAllUsers)
+	g := router.Group("/api/users")
+	{
+		g.POST("", rh.userController.CreateUser)
+		g.GET("/:id", rh.userController.GetUserByID)
+		g.PUT("/:id", rh.userController.UpdateUser)
+		g.DELETE("/:id", rh.userController.DeleteUser)
+		g.GET("", rh.userController.GetAllUsers)
+	}
 }
