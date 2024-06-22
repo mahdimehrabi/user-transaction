@@ -113,11 +113,16 @@ func (s AuthService) RenewToken(refreshToken string) (accessToken string, expAcc
 	var atClaims jwt.MapClaims
 	refreshSecret := "refresh" + s.env.Secret
 	valid, atClaims, err = DecodeToken(refreshToken, refreshSecret)
+	var vErr *jwt.ValidationError
+	if errors.As(err, &vErr) {
+		err = userRepo.ErrNotFound
+		return
+	}
 	if err != nil {
 		return
 	}
 
-	uid, ok := atClaims["userId"].(string)
+	uid, ok := atClaims["userID"].(float64)
 	if !ok {
 		return
 	}
@@ -134,7 +139,11 @@ func (s AuthService) RenewToken(refreshToken string) (accessToken string, expAcc
 
 	if valid {
 		expAccessToken = time.Now().Add(time.Minute * 30).Unix()
-		accessToken, _ = s.CreateAccessToken(user, expAccessToken, s.env.Secret)
+		accessToken, err = s.CreateAccessToken(user, expAccessToken, s.env.Secret)
+		if err != nil {
+			s.logger.Errorf("error in creating access token:%s", err)
+			return
+		}
 		return
 	}
 	err = userRepo.ErrNotFound
