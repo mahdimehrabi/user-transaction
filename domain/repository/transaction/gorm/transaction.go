@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"bbdk/domain/dto"
 	"bbdk/domain/entity"
 	transactionRepo "bbdk/domain/repository/transaction"
 	"errors"
@@ -84,4 +85,16 @@ func (r *TransactionRepository) FindByField(field string, value interface{}) (*e
 		return nil, err
 	}
 	return &transaction, nil
+}
+
+func (r *TransactionRepository) FindSumByTypeUserID(userID uint) ([]*dto.Report, error) {
+	var results []*dto.Report
+	if err := r.db.Model(&entity.Transaction{}).
+		Select("type, sum(amount) as total").
+		Where("user_id = ?", userID).
+		Group("type").
+		Find(&results).Error; err != nil {
+		return nil, err
+	}
+	return results, nil
 }

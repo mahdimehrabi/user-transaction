@@ -136,3 +136,19 @@ func (tc *TransactionController) GetAllTransactions(c *gin.Context) {
 
 	response.Response(c, responses, http.StatusOK, "")
 }
+
+func (tc *TransactionController) GetTransactionReportByUserID(c *gin.Context) {
+	userID, err := strconv.ParseUint(c.Param("userID"), 10, 64)
+	if err != nil {
+		response.Response(c, nil, http.StatusBadRequest, "invalid user ID")
+		return
+	}
+
+	report, err := tc.service.GetTransactionReportByUserID(uint(userID))
+	if err != nil {
+		response.InternalServerError(c)
+		return
+	}
+
+	response.Response(c, report, http.StatusOK, "")
+}

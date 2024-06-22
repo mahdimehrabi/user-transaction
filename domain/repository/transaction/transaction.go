@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"bbdk/domain/dto"
 	"bbdk/domain/entity"
 	"errors"
 )
@@ -17,4 +18,5 @@ type Repository interface {
 	DeleteTransaction(id uint) error
 	GetAll(offset, limit int) ([]*entity.Transaction, error)
 	FindByField(field string, value interface{}) (*entity.Transaction, error)
+	FindSumByTypeUserID(userID uint) ([]*dto.Report, error)
 }

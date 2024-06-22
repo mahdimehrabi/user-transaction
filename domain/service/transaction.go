@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bbdk/domain/dto"
 	"bbdk/domain/entity"
 	transactionRepo "bbdk/domain/repository/transaction"
 	logger "bbdk/infrastructure/log"
@@ -14,6 +15,7 @@ type TransactionService interface {
 	DeleteTransaction(id uint) error
 	GetAllTransactions(page, pageSize int) ([]*entity.Transaction, error)
 	FindTransactionByField(field string, value interface{}) (*entity.Transaction, error)
+	GetTransactionReportByUserID(userID uint) ([]*dto.Report, error)
 }
 
 type transactionService struct {
@@ -98,4 +100,13 @@ func (s *transactionService) FindTransactionByField(field string, value interfac
 		return nil, err
 	}
 	return transaction, nil
+}
+
+func (s *transactionService) GetTransactionReportByUserID(userID uint) ([]*dto.Report, error) {
+	report, err := s.transactionRepo.FindSumByTypeUserID(userID)
+	if err != nil {
+		s.logger.Errorf("failed to fetch transaction report for user %d: %s", userID, err.Error())
+		return nil, err
+	}
+	return report, nil
 }

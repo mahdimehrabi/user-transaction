@@ -20,6 +20,7 @@ func NewTransactionRouter(transactionService service.TransactionService, authMid
 func (rh *TransactionRouter) SetupRoutes(router *gin.Engine) {
 	g := router.Group("/api/transactions").Use(rh.authMiddleware.Handle())
 	{
+		g.GET("/report/:userID", rh.transactionController.GetTransactionReportByUserID)
 		g.POST("", rh.transactionController.CreateTransaction)
 		g.GET("/:id", rh.transactionController.GetTransactionByID)
 		g.PUT("/:id", rh.transactionController.UpdateTransaction)
