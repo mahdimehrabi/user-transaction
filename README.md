@@ -15,12 +15,13 @@ create database
 # CREATE DATABASE bdbdk;
 ```
 
+##### please consider we run migration from host and we seperated the migration process from production container because of security and liteness so before running migration you must change postgresql host environment variable in .env
+so replace "database" to 127.0.0.1 in DATABASE_HOST environment variable in .env
+
 run migrations
 ```
 make db-migrate-up
 ```
-
-##### please consider we run migration from host and we seperated the migration process from production container because of security and liteness so before running migration you must change postgresql host environment variable in .env 
 
 
 
