@@ -8,6 +8,7 @@ import (
 	"bbdk/domain/service"
 	"bbdk/infrastructure/godotenv"
 	logger "bbdk/infrastructure/log"
+	"bbdk/utils/validator"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -19,6 +20,10 @@ type Router interface {
 
 func CreateRouters(env *godotenv.Env, logger logger.Logger) []Router {
 	db, err := gorm.Open(postgres.Open(env.DATABASE_HOST), &gorm.Config{})
+	fk := validator.NewFkValidator(db)
+	if err := fk.Setup(); err != nil {
+		logger.Fatalf("failed to setup fk validator error:%s", err.Error())
+	}
 	if err != nil {
 		logger.Fatalf("failed to connect to database error:%s", err.Error())
 	}
