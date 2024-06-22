@@ -27,7 +27,7 @@ run seeder
 ```
  make db-seed
 ```
-
+all seed users password is `a12345678`
 
 ## REST API Doc (I wanted to implement swagger too but I changed my mind because I didn't had enough time on friday🥴 )
 ### Authentication & JWT

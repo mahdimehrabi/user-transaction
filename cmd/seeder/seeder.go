@@ -5,6 +5,7 @@ import (
 	gorm3 "bbdk/domain/repository/transaction/gorm"
 	gorm2 "bbdk/domain/repository/user/gorm"
 	"bbdk/infrastructure/godotenv"
+	"bbdk/utils/encrypt"
 	"fmt"
 	"github.com/bxcodec/faker/v3"
 	"gorm.io/driver/postgres"
@@ -29,7 +30,7 @@ func Seed() error {
 		user := entity.User{
 			Name:     faker.Name(),
 			Email:    faker.Email(),
-			Password: faker.Password(),
+			Password: encrypt.HashSHA256("a12345678"),
 		}
 		err := userRepo.CreateUser(&user)
 		if err != nil {
