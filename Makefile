@@ -21,3 +21,6 @@ db-drop:
 db-create-migration:
 		@read -p  "What is the name of migration?" NAME; \
 		${MIGRATE} create -ext sql -seq -dir migration  $$NAME
+
+db-seed:
+	go run ./cmd/main.go  --seed

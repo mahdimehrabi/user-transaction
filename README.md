@@ -23,7 +23,10 @@ run migrations
 make db-migrate-up
 ```
 
-
+run seeder
+```
+ make db-seed
+```
 
 
 ## REST API Doc (I wanted to implement swagger too but I changed my mind because I didn't had enough time on friday🥴 )
